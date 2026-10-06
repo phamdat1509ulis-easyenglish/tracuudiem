@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tra cứu điểm thường xuyên số 1</title>
+<style>
+  * {
+    box-sizing: border-box;
+  }
+
+  :root {
+    --blue-900: #174a78;
+    --blue-800: #205d91;
+    --blue-700: #2f73aa;
+    --blue-500: #69a9d8;
+    --blue-300: #a9d4ef;
+    --blue-200: #cce8f8;
+    --blue-100: #e9f6fd;
+    --blue-050: #f6fbff;
+    --text: #18364f;
+    --muted: #66829a;
+    --white: #ffffff;
+    --danger: #b44747;
+    --success: #27765a;
+    --shadow: 0 24px 70px rgba(48, 108, 151, .18);
+  }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    font-family: Inter, "Segoe UI", Roboto, Arial, sans-serif;
+    color: var(--text);
+    background:
+      radial-gradient(circle at 15% 15%, rgba(255,255,255,.95) 0 8%, transparent 28%),
+      radial-gradient(circle at 85% 85%, rgba(169,212,239,.55) 0 8%, transparent 30%),
+      linear-gradient(135deg, #f7fcff 0%, #deeffb 42%, #c5e4f7 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 34px 18px;
+  }
+
+  .page {
+    width: min(980px, 100%);
+  }
+
+  .header {
+    text-align: center;
+    margin-bottom: 24px;
+  }
+
+  .eyebrow {
+    display: inline-block;
+    margin-bottom: 10px;
+    padding: 7px 14px;
+    border: 1px solid rgba(47, 115, 170, .18);
+    border-radius: 999px;
+    background: rgba(255,255,255,.55);
+    color: var(--blue-700);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+  }
+
+  h1 {
+    margin: 0;
+    color: var(--blue-900);
+    font-size: clamp(28px, 5vw, 44px);
+    line-height: 1.1;
+    letter-spacing: -.03em;
+  }
+
+  .subtitle {
+    max-width: 650px;
+    margin: 12px auto 0;
+    color: var(--muted);
+    font-size: 15px;
+    line-height: 1.7;
+  }
+
+  .card {
+    background: rgba(255,255,255,.88);
+    border: 1px solid rgba(255,255,255,.92);
+    border-radius: 28px;
+    box-shadow: var(--shadow);
+    backdrop-filter: blur(12px);
+    overflow: hidden;
+  }
+
+  .form-wrap {
+    padding: 30px;
+  }
+
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1.4fr .8fr;
+    gap: 18px;
+  }
+
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .field.full {
+    grid-column: 1 / -1;
+  }
+
+  label {
+    font-size: 13px;
+    font-weight: 750;
+    color: var(--blue-800);
+  }
+
+  input {
+    width: 100%;
+    height: 50px;
+    padding: 0 15px;
+    border: 1px solid #c8deed;
+    border-radius: 14px;
+    outline: none;
+    background: rgba(248,252,255,.95);
+    color: var(--text);
+    font-size: 16px;
+    transition: .2s ease;
+  }
+
+  input:focus {
+    border-color: var(--blue-500);
+    background: #fff;
+    box-shadow: 0 0 0 4px rgba(105,169,216,.12);
+  }
+
+  .captcha-area {
+    margin-top: 20px;
+    padding: 18px;
+    border-radius: 18px;
+    background: linear-gradient(135deg, #f3faff, #e4f3fc);
+    border: 1px solid #cfe6f4;
+  }
+
+  .captcha-title {
+    font-size: 13px;
+    font-weight: 750;
+    color: var(--blue-800);
+    margin-bottom: 10px;
+  }
+
+  .captcha-row {
+    display: grid;
+    grid-template-columns: 170px 1fr 90px;
+    gap: 12px;
+    align-items: center;
+  }
+
+  .captcha-code {
+    min-height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px dashed #7cb2d6;
+    border-radius: 14px;
+    background:
+      repeating-linear-gradient(-45deg, rgba(255,255,255,.9) 0 8px, rgba(224,242,252,.85) 8px 16px);
+    color: var(--blue-900);
+    font-family: "Courier New", monospace;
+    font-size: 25px;
+    font-weight: 800;
+    letter-spacing: 7px;
+    user-select: none;
+  }
+
+  .refresh {
+    height: 50px;
+    border: 1px solid #b8d7eb;
+    border-radius: 14px;
+    background: #fff;
+    color: var(--blue-700);
+    font-weight: 750;
+    cursor: pointer;
+    transition: .2s ease;
+  }
+
+  .refresh:hover {
+    background: #f4faff;
+    border-color: #8bbddd;
+  }
+
+  .captcha-status {
+    min-height: 20px;
+    margin-top: 8px;
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  .captcha-status.ok {
+    color: var(--success);
+    font-weight: 700;
+  }
+
+  .captcha-status.bad {
+    color: var(--danger);
+    font-weight: 700;
+  }
+
+  .actions {
+    margin-top: 20px;
+  }
+
+  #searchBtn {
+    width: 100%;
+    height: 54px;
+    border: 0;
+    border-radius: 16px;
+    color: #fff;
+    background: linear-gradient(135deg, #67a9d9, #2f73aa);
+    font-size: 16px;
+    font-weight: 800;
+    letter-spacing: .01em;
+    cursor: pointer;
+    box-shadow: 0 12px 28px rgba(47,115,170,.23);
+    transition: transform .2s ease, opacity .2s ease, box-shadow .2s ease;
+  }
+
+  #searchBtn:not(:disabled):hover {
+    transform: translateY(-1px);
+    box-shadow: 0 15px 34px rgba(47,115,170,.28);
+  }
+
+  #searchBtn:disabled {
+    cursor: not-allowed;
+    opacity: .38;
+    box-shadow: none;
+  }
+
+  .hint {
+    margin-top: 10px;
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.5;
+    text-align: center;
+  }
+
+  .result-zone {
+    display: none;
+    border-top: 1px solid #e2eef6;
+    background: linear-gradient(180deg, rgba(244,250,254,.8), rgba(255,255,255,.98));
+    padding: 26px 30px 32px;
+  }
+
+  .result-zone.show {
+    display: block;
+    animation: rise .28s ease-out;
+  }
+
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .result-head {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 18px;
+  }
+
+  .student-name {
+    margin: 0;
+    font-size: 23px;
+    color: var(--blue-900);
+    line-height: 1.25;
+  }
+
+  .student-meta {
+    margin-top: 6px;
+    color: var(--muted);
+    font-size: 13px;
+  }
+
+  .total-box {
+    min-width: 112px;
+    text-align: center;
+    padding: 12px 14px;
+    border-radius: 17px;
+    background: linear-gradient(135deg, #e4f4fe, #cbe9fa);
+    border: 1px solid #b9ddf2;
+  }
+
+  .total-label {
+    display: block;
+    color: var(--blue-700);
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: .09em;
+  }
+
+  .total-value {
+    display: block;
+    margin-top: 3px;
+    color: var(--blue-900);
+    font-size: 28px;
+    font-weight: 900;
+    line-height: 1;
+  }
+
+  .score-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
+
+  .score-item {
+    padding: 16px;
+    border-radius: 16px;
+    background: #fff;
+    border: 1px solid #deedf6;
+  }
+
+  .score-label {
+    display: block;
+    color: var(--muted);
+    font-size: 12px;
+    margin-bottom: 6px;
+  }
+
+  .score-value {
+    color: var(--blue-900);
+    font-size: 22px;
+    font-weight: 850;
+  }
+
+  .note {
+    margin-top: 14px;
+    padding: 14px 16px;
+    border-radius: 14px;
+    background: #f7fbfe;
+    border: 1px solid #e0edf5;
+    color: #54738b;
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
+  .error-box {
+    padding: 16px 18px;
+    border: 1px solid #efcccc;
+    border-radius: 14px;
+    background: #fff7f7;
+    color: #954343;
+    line-height: 1.55;
+    font-size: 14px;
+  }
+
+  .footer {
+    text-align: center;
+    margin-top: 16px;
+    color: #728da2;
+    font-size: 12px;
+  }
+
+  @media (max-width: 680px) {
+    body {
+      padding: 22px 12px;
+      align-items: flex-start;
+    }
+
+    .form-wrap,
+    .result-zone {
+      padding-left: 18px;
+      padding-right: 18px;
+    }
+
+    .form-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .captcha-row {
+      grid-template-columns: 1fr;
+    }
+
+    .refresh {
+      width: 100%;
+    }
+
+    .score-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .result-head {
+      flex-direction: column;
+    }
+
+    .total-box {
+      width: 100%;
+    }
+  }
+</style>
+</head>
+<body>
+  <main class="page">
+    <header class="header">
+      <div class="eyebrow">Hệ thống tra cứu cá nhân</div>
+      <h1>Tra cứu điểm thường xuyên số 1</h1>
+      <p class="subtitle">Nhập đúng họ và tên, mã số cá nhân và dãy số xác nhận để xem kết quả.</p>
+    </header>
+
+    <section class="card">
+      <div class="form-wrap">
+        <div class="form-grid">
+          <div class="field">
+            <label for="fullName">Họ và tên</label>
+            <input id="fullName" type="text" autocomplete="off" placeholder="Ví dụ: Nguyễn Văn An">
+          </div>
+
+          <div class="field">
+            <label for="studentCode">Mã số</label>
+            <input id="studentCode" type="text" inputmode="numeric" autocomplete="off" placeholder="Nhập mã số">
+          </div>
+        </div>
+
+        <div class="captcha-area">
+          <div class="captcha-title">Xác nhận dãy số</div>
+          <div class="captcha-row">
+            <div id="captchaCode" class="captcha-code" aria-label="Dãy số xác nhận"></div>
+            <input id="captchaInput" type="text" inputmode="numeric" autocomplete="off" maxlength="5" placeholder="Nhập dãy số bên trái">
+            <button id="refreshCaptcha" class="refresh" type="button">Đổi mã</button>
+          </div>
+          <div id="captchaStatus" class="captcha-status">Nhập chính xác dãy số để mở nút Tra cứu.</div>
+        </div>
+
+        <div class="actions">
+          <button id="searchBtn" type="button" disabled>Tra cứu</button>
+          <div class="hint">Thông tin phải khớp đồng thời họ tên và mã số.</div>
+        </div>
+      </div>
+
+      <div id="resultZone" class="result-zone" aria-live="polite"></div>
+    </section>
+
+    <div class="footer">Dữ liệu chỉ hiển thị khi thông tin tra cứu khớp.</div>
+  </main>
+
+<script>
+const STUDENTS = [{"stt": 1, "name": "Phạm Bảo An", "dob": "31/07/2009", "gender": "Nữ", "code": "31229", "kt": "3.0", "ol": "0", "star": "-0.3", "total": "2.7", "note": "Bỏ 1 bài OL"}, {"stt": 2, "name": "Lê Phan Hà Anh", "dob": "10/07/2009", "gender": "Nữ", "code": "190979", "kt": "4.0", "ol": "3.5", "star": "0.5", "total": "8.0", "note": ""}, {"stt": 3, "name": "Lưu Nguyễn Hà Anh", "dob": "04/12/2009", "gender": "Nữ", "code": "41209", "kt": "6.3", "ol": "3.1", "star": "0.9", "total": "10.0", "note": ""}, {"stt": 4, "name": "Ngô Đăng Việt Anh", "dob": "07/07/2009", "gender": "Nam", "code": "31770", "kt": "4.8", "ol": "2.7", "star": "-4", "total": "3.5", "note": ""}, {"stt": 5, "name": "Ngô Lê Hải Anh", "dob": "28/03/2009", "gender": "Nữ", "code": "28035", "kt": "4.5", "ol": "3.5", "star": "-0.9", "total": "7.1", "note": ""}, {"stt": 6, "name": "Nguyễn Hải Anh", "dob": "09/03/2009", "gender": "Nữ", "code": "15069", "kt": "3.8", "ol": "3.1", "star": "1.9", "total": "8.8", "note": ""}, {"stt": 7, "name": "Nguyễn Ngọc Anh", "dob": "22/11/2009", "gender": "Nữ", "code": "72613", "kt": "3.5", "ol": "2.9", "star": "-2.7", "total": "3.7", "note": ""}, {"stt": 8, "name": "Phạm Nguyễn Vân Anh", "dob": "29/03/2009", "gender": "Nữ", "code": "290309", "kt": "4.3", "ol": "3.1", "star": "1.8", "total": "9.2", "note": ""}, {"stt": 9, "name": "Nguyễn Đình Ngọc Ánh", "dob": "26/07/2009", "gender": "Nữ", "code": "262009", "kt": "3.3", "ol": "3.5", "star": "1.8", "total": "8.6", "note": ""}, {"stt": 10, "name": "Mạc Quỳnh Chi", "dob": "06/08/2009", "gender": "Nữ", "code": "07056", "kt": "5.5", "ol": "3.1", "star": "-0.2", "total": "8.4", "note": ""}, {"stt": 11, "name": "Nguyễn Thị Quỳnh Chi", "dob": "02/09/2009", "gender": "Nữ", "code": "14257", "kt": "5.3", "ol": "3.3", "star": "1.3", "total": "9.9", "note": ""}, {"stt": 12, "name": "Ngô Hương Giang", "dob": "22/07/2009", "gender": "Nữ", "code": "14028", "kt": "4.3", "ol": "3.1", "star": "1.6", "total": "9.0", "note": ""}, {"stt": 13, "name": "Dương Thị Ngọc Hân", "dob": "14/09/2009", "gender": "Nữ", "code": "10108", "kt": "2.5", "ol": "-0.5", "star": "-2.3", "total": "0.0", "note": ""}, {"stt": 14, "name": "Đỗ Nhật Hồng", "dob": "09/05/2009", "gender": "Nữ", "code": "07027", "kt": "3.0", "ol": "3.5", "star": "0.6", "total": "7.1", "note": ""}, {"stt": 15, "name": "Nguyễn Ngọc Huyền", "dob": "23/06/2009", "gender": "Nữ", "code": "28409", "kt": "5.0", "ol": "-1.5", "star": "0.2", "total": "3.7", "note": "Bỏ 4 bài OL"}, {"stt": 16, "name": "Vũ Thị Minh Huyền", "dob": "22/06/2009", "gender": "Nữ", "code": "22069", "kt": "7.3", "ol": "2.9", "star": "-5.5", "total": "4.7", "note": ""}, {"stt": 17, "name": "Dương Thị Mai Hương", "dob": "09/05/2009", "gender": "Nữ", "code": "09059", "kt": "3.3", "ol": "3.5", "star": "0.3", "total": "7.1", "note": ""}, {"stt": 18, "name": "Trần Lan Hương", "dob": "22/01/2009", "gender": "Nữ", "code": "18112", "kt": "4.5", "ol": "3.5", "star": "1", "total": "9.0", "note": ""}, {"stt": 19, "name": "Nguyễn Thị Phương Lan", "dob": "18/10/2009", "gender": "Nữ", "code": "12049", "kt": "6.5", "ol": "3.1", "star": "0.6", "total": "10.0", "note": ""}, {"stt": 20, "name": "Hoàng Thùy Linh", "dob": "27/06/2009", "gender": "Nữ", "code": "27629", "kt": "5.3", "ol": "3.5", "star": "1.5", "total": "10.0", "note": ""}, {"stt": 21, "name": "Lê Diệu Linh", "dob": "23/04/2009", "gender": "Nữ", "code": "061238", "kt": "3.3", "ol": "2.9", "star": "0.4", "total": "6.6", "note": ""}, {"stt": 22, "name": "Ngô Phương Linh", "dob": "16/10/2009", "gender": "Nữ", "code": "161029", "kt": "2.8", "ol": "3.5", "star": "-2.2", "total": "4.1", "note": ""}, {"stt": 23, "name": "Nguyễn Hoàng Linh", "dob": "09/07/2009", "gender": "Nữ", "code": "907143", "kt": "4.0", "ol": "3.5", "star": "-0.5", "total": "7.0", "note": ""}, {"stt": 24, "name": "Nguyễn Thục Gia Linh", "dob": "12/01/2009", "gender": "Nữ", "code": "12010", "kt": "4.0", "ol": "3.5", "star": "-0.6", "total": "6.9", "note": ""}, {"stt": 25, "name": "Trần Hà Linh", "dob": "22/09/2009", "gender": "Nữ", "code": "31089", "kt": "4.8", "ol": "3.1", "star": "0.5", "total": "8.4", "note": ""}, {"stt": 26, "name": "Dương Hà Ly", "dob": "18/05/2009", "gender": "Nữ", "code": "18509", "kt": "3.5", "ol": "3.5", "star": "-1.3", "total": "5.7", "note": ""}, {"stt": 27, "name": "Trần Thanh Mai", "dob": "29/12/2009", "gender": "Nữ", "code": "10106", "kt": "3.3", "ol": "3.1", "star": "0.3", "total": "6.7", "note": ""}, {"stt": 28, "name": "Nguyễn Phạm Hồng Minh", "dob": "18/09/2009", "gender": "Nữ", "code": "180909", "kt": "5.3", "ol": "0", "star": "0", "total": "5.3", "note": "Bỏ 1 bài OL"}, {"stt": 29, "name": "Phạm Tuấn Minh", "dob": "22/01/2009", "gender": "Nam", "code": "307221", "kt": "4.0", "ol": "3.7", "star": "-1.5", "total": "6.2", "note": ""}, {"stt": 30, "name": "Phạm Thị Yến Nhi", "dob": "01/06/2009", "gender": "Nữ", "code": "02061", "kt": "3.3", "ol": "3.1", "star": "-0.5", "total": "5.9", "note": ""}, {"stt": 31, "name": "Ngô Thị Oanh", "dob": "26/02/2009", "gender": "Nữ", "code": "104769", "kt": "3.0", "ol": "3.1", "star": "-1.2", "total": "4.9", "note": ""}, {"stt": 32, "name": "Đào Minh Phương", "dob": "15/07/2009", "gender": "Nữ", "code": "12579", "kt": "5.2", "ol": "3.1", "star": "0.7", "total": "9.0", "note": ""}, {"stt": 33, "name": "Ngô Hà Phương", "dob": "05/01/2009", "gender": "Nữ", "code": "012345", "kt": "8.8", "ol": "3.3", "star": "0.3", "total": "10.0", "note": ""}, {"stt": 34, "name": "Ngô Thị Minh Thành", "dob": "08/01/2009", "gender": "Nữ", "code": "050505", "kt": "3.5", "ol": "3.1", "star": "0.3", "total": "6.9", "note": ""}, {"stt": 35, "name": "Ngô Phương Thảo", "dob": "19/09/2009", "gender": "Nữ", "code": "09819", "kt": "3.8", "ol": "3.3", "star": "0.2", "total": "7.3", "note": ""}, {"stt": 36, "name": "Nguyễn Thị Uyên Thi", "dob": "09/10/2009", "gender": "Nữ", "code": "19627", "kt": "7.5", "ol": "2.9", "star": "0.8", "total": "10.0", "note": ""}, {"stt": 37, "name": "Trịnh Lê Thịnh", "dob": "17/07/2009", "gender": "Nam", "code": "12345", "kt": "3.3", "ol": "3.3", "star": "-3.2", "total": "3.4", "note": ""}, {"stt": 38, "name": "Hoàng Bảo Thoa", "dob": "15/01/2009", "gender": "Nữ", "code": "15019", "kt": "2.5", "ol": "2.7", "star": "0.8", "total": "6.0", "note": ""}, {"stt": 39, "name": "Đỗ Thu Thủy", "dob": "03/08/2009", "gender": "Nữ", "code": "13109", "kt": "3.8", "ol": "3.1", "star": "-0.7", "total": "6.2", "note": ""}, {"stt": 40, "name": "Lê Song Thư", "dob": "11/11/2009", "gender": "Nữ", "code": "40110", "kt": "3.8", "ol": "3.5", "star": "-5.9", "total": "1.4", "note": ""}, {"stt": 41, "name": "Trần Đỗ Nam Trà", "dob": "03/01/2009", "gender": "Nữ", "code": "312009", "kt": "2.0", "ol": "-0.5", "star": "0.8", "total": "2.3", "note": "Bỏ 2 bài OL"}, {"stt": 42, "name": "Lê Minh Trang", "dob": "18/04/2009", "gender": "Nữ", "code": "23189", "kt": "3.5", "ol": "3.3", "star": "-0.8", "total": "6.0", "note": ""}, {"stt": 43, "name": "Nguyễn Thị Kiều Trang", "dob": "21/09/2009", "gender": "Nữ", "code": "21968", "kt": "4.0", "ol": "3.1", "star": "-1.5", "total": "5.6", "note": ""}, {"stt": 44, "name": "Nguyễn Thu Uyên", "dob": "08/01/2009", "gender": "Nữ", "code": "290801", "kt": "5.5", "ol": "3.5", "star": "0.3", "total": "9.3", "note": ""}, {"stt": 45, "name": "Trần Khánh Vy", "dob": "30/07/2009", "gender": "Nữ", "code": "201637", "kt": "4.5", "ol": "3.3", "star": "3.8", "total": "10.0", "note": ""}, {"stt": 46, "name": "Nguyễn Thị Thanh Xuân", "dob": "01/01/2009", "gender": "Nữ", "code": "01290", "kt": "5.0", "ol": "-0.5", "star": "0.2", "total": "4.7", "note": "Bỏ 2 bài OL"}];
+
+const fullName = document.getElementById('fullName');
+const studentCode = document.getElementById('studentCode');
+const captchaCode = document.getElementById('captchaCode');
+const captchaInput = document.getElementById('captchaInput');
+const refreshCaptcha = document.getElementById('refreshCaptcha');
+const captchaStatus = document.getElementById('captchaStatus');
+const searchBtn = document.getElementById('searchBtn');
+const resultZone = document.getElementById('resultZone');
+
+let currentCaptcha = '';
+
+function normalizeName(value) {
+  return value
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/đ/g, 'd')
+    .replace(/Đ/g, 'D')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .toLowerCase();
+}
+
+function newCaptcha() {
+  currentCaptcha = String(Math.floor(10000 + Math.random() * 90000));
+  captchaCode.textContent = currentCaptcha;
+  captchaInput.value = '';
+  captchaStatus.textContent = 'Nhập chính xác dãy số để mở nút Tra cứu.';
+  captchaStatus.className = 'captcha-status';
+  updateButton();
+}
+
+function captchaIsCorrect() {
+  return captchaInput.value.trim() === currentCaptcha;
+}
+
+function updateButton() {
+  const hasName = fullName.value.trim().length >= 2;
+  const hasCode = studentCode.value.trim().length >= 1;
+  const validCaptcha = captchaIsCorrect();
+
+  searchBtn.disabled = !(hasName && hasCode && validCaptcha);
+
+  if (captchaInput.value.trim() === '') {
+    captchaStatus.textContent = 'Nhập chính xác dãy số để mở nút Tra cứu.';
+    captchaStatus.className = 'captcha-status';
+  } else if (validCaptcha) {
+    captchaStatus.textContent = 'Dãy số xác nhận chính xác.';
+    captchaStatus.className = 'captcha-status ok';
+  } else {
+    captchaStatus.textContent = 'Dãy số chưa đúng.';
+    captchaStatus.className = 'captcha-status bad';
+  }
+}
+
+function escapeHtml(value) {
+  return String(value)
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#039;');
+}
+
+function showStudent(student) {
+  const note = student.note
+    ? `<div class="note"><strong>Ghi chú:</strong> ${escapeHtml(student.note)}</div>`
+    : `<div class="note">Không có ghi chú bổ sung.</div>`;
+
+  resultZone.innerHTML = `
+    <div class="result-head">
+      <div>
+        <h2 class="student-name">${escapeHtml(student.name)}</h2>
+        <div class="student-meta">Mã số: ${escapeHtml(student.code)}</div>
+      </div>
+      <div class="total-box">
+        <span class="total-label">Tổng điểm</span>
+        <span class="total-value">${escapeHtml(student.total)}</span>
+      </div>
+    </div>
+
+    <div class="score-grid">
+      <div class="score-item">
+        <span class="score-label">Điểm KT</span>
+        <span class="score-value">${escapeHtml(student.kt)}</span>
+      </div>
+      <div class="score-item">
+        <span class="score-label">Điểm OL</span>
+        <span class="score-value">${escapeHtml(student.ol)}</span>
+      </div>
+      <div class="score-item">
+        <span class="score-label">Sao</span>
+        <span class="score-value">${escapeHtml(student.star)}</span>
+      </div>
+    </div>
+    ${note}
+  `;
+  resultZone.classList.add('show');
+}
+
+function showError(message) {
+  resultZone.innerHTML = `<div class="error-box">${escapeHtml(message)}</div>`;
+  resultZone.classList.add('show');
+}
+
+function searchStudent() {
+  if (searchBtn.disabled) return;
+
+  const wantedName = normalizeName(fullName.value);
+  const wantedCode = studentCode.value.trim();
+
+  const student = STUDENTS.find(item =>
+    normalizeName(item.name) === wantedName &&
+    item.code === wantedCode
+  );
+
+  if (student) {
+    showStudent(student);
+  } else {
+    showError('Không tìm thấy kết quả phù hợp. Vui lòng kiểm tra lại họ và tên hoặc mã số.');
+  }
+
+  newCaptcha();
+}
+
+[fullName, studentCode, captchaInput].forEach(el => {
+  el.addEventListener('input', updateButton);
+  el.addEventListener('keydown', event => {
+    if (event.key === 'Enter' && !searchBtn.disabled) {
+      searchStudent();
+    }
+  });
+});
+
+refreshCaptcha.addEventListener('click', newCaptcha);
+searchBtn.addEventListener('click', searchStudent);
+
+newCaptcha();
+</script>
+</body>
+</html>
